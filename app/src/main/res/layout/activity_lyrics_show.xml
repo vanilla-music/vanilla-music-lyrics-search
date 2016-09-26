@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp"
+    tools:context=".LyricsShowActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingBottom="5dp"
+        android:fadeScrollbars="false">
+
+        <ViewSwitcher
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/loading_switcher">
+
+            <ProgressBar
+                android:layout_gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:indeterminate="true"/>
+
+            <TextView
+                android:layout_gravity="top|center_horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:id="@+id/lyrics_text"/>
+
+        </ViewSwitcher>
+
+    </ScrollView>
+
+    <Button
+        style="?android:attr/buttonBarButtonStyle"
+        android:visibility="gone"
+        android:text="@string/write_to_file"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/write_file_button"/>
+
+    <Button
+        style="?android:attr/buttonBarButtonStyle"
+        android:text="@android:string/ok"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/ok_button"/>
+
+</LinearLayout>

@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Vanilla Lyrics Search</string>
+    <string name="lyrics_search">Lyrics search</string>
+    <string name="plugin_desc">Allows you to search lyrics for songs on lyrics wikia</string>
+    <string name="lyrics_not_found">Lyrics not found!</string>
+    <string name="write_to_file">Write to file</string>
+</resources>

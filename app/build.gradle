@@ -1,0 +1,32 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "24.0.2"
+
+    defaultConfig {
+        applicationId "com.kanedias.vanilla.lyrics"
+        minSdkVersion 14
+        targetSdkVersion 24
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.dbg'
+        }
+
+        release {
+            zipAlignEnabled true
+        }
+    }
+
+
+}
+
+dependencies {
+    compile 'com.android.support:support-compat:24.2.1'
+    compile 'org.jsoup:jsoup:1.8.3'     // for parsing lyrics wiki pages
+}
