@@ -108,11 +108,11 @@ public class PluginService extends Service {
      */
     private void handleRequestPluginParams() {
         Intent answer = new Intent(ACTION_HANDLE_PLUGIN_PARAMS);
-        answer.setComponent(new ComponentName(VANILLA_PACKAGE_NAME, VANILLA_PACKAGE_NAME + VANILLA_SERVICE_NAME));
+        answer.setPackage(VANILLA_PACKAGE_NAME);
         answer.putExtra(EXTRA_PARAM_PLUGIN_NAME, getString(R.string.lyrics_search));
         answer.putExtra(EXTRA_PARAM_PLUGIN_APP, getApplicationInfo());
         answer.putExtra(EXTRA_PARAM_PLUGIN_DESC, getString(R.string.plugin_desc));
-        getApplicationContext().startService(answer);
+        sendBroadcast(answer);
     }
 
     private void handleLaunchPlugin(Intent intent) {
@@ -121,7 +121,7 @@ public class PluginService extends Service {
             mOriginalIntent = intent;
             Intent readLyrics = new Intent(ACTION_LAUNCH_PLUGIN);
             readLyrics.setPackage(PluginService.PLUGIN_TAG_EDIT_PKG);
-            readLyrics.putExtra(EXTRA_PARAM_FILE_PATH, intent.getStringExtra(EXTRA_PARAM_FILE_PATH));
+            readLyrics.putExtra(EXTRA_PARAM_URI, intent.getParcelableExtra(EXTRA_PARAM_URI));
             readLyrics.putExtra(EXTRA_PARAM_PLUGIN_APP, getApplicationInfo());
             readLyrics.putExtra(EXTRA_PARAM_P2P, P2P_READ_TAG);
             readLyrics.putExtra(EXTRA_PARAM_P2P_KEY, new String[]{"LYRICS"}); // tag name

@@ -36,7 +36,7 @@ public class PluginConstants {
     static final String EXTRA_PARAM_PLUGIN_DESC = "ch.blinkenlights.android.vanilla.extra.PLUGIN_DESC";
 
     // this is passed to plugin when it is selected by user
-    static final String EXTRA_PARAM_FILE_PATH = "ch.blinkenlights.android.vanilla.extra.FILE_PATH";
+    static final String EXTRA_PARAM_URI = "ch.blinkenlights.android.vanilla.extra.URI";
     static final String EXTRA_PARAM_SONG_TITLE = "ch.blinkenlights.android.vanilla.extra.SONG_TITLE";
     static final String EXTRA_PARAM_SONG_ALBUM = "ch.blinkenlights.android.vanilla.extra.SONG_ALBUM";
     static final String EXTRA_PARAM_SONG_ARTIST = "ch.blinkenlights.android.vanilla.extra.SONG_ARTIST";
@@ -53,5 +53,4 @@ public class PluginConstants {
     static final String LOG_TAG = "Vanilla:LyricsPlugin";
 
     static final String VANILLA_PACKAGE_NAME = "ch.blinkenlights.android.vanilla";
-    static final String VANILLA_SERVICE_NAME = ".PlaybackService";
 }

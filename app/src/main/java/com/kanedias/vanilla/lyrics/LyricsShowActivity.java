@@ -18,8 +18,6 @@ package com.kanedias.vanilla.lyrics;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.ResolveInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -28,8 +26,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
-
-import java.util.List;
 
 import static com.kanedias.vanilla.lyrics.PluginConstants.*;
 import static com.kanedias.vanilla.lyrics.PluginService.pluginInstalled;
@@ -62,6 +58,27 @@ public class LyricsShowActivity extends Activity {
         mOkButton = (Button) findViewById(R.id.ok_button);
 
         setupUI();
+        handlePassedIntent(); // called in onCreate to be shown only once
+    }
+
+    private void handlePassedIntent() {
+        // check if this is an answer from tag plugin
+        if (TextUtils.equals(getIntent().getStringExtra(EXTRA_PARAM_P2P), P2P_READ_TAG)) {
+            // already checked this string in service, no need in additional checks
+            String lyrics = getIntent().getStringArrayExtra(EXTRA_PARAM_P2P_VAL)[0];
+            mLyricsText.setText(lyrics);
+            mSwitcher.showNext();
+            return;
+        }
+
+        // if tag editor is installed, show `write to tag` button
+        if (pluginInstalled(this, PluginService.PLUGIN_TAG_EDIT_PKG)) {
+            mWriteFileButton.setVisibility(View.VISIBLE);
+            mWriteFileButton.setOnClickListener(new LyricsShowActivity.LyricsToTagSender());
+        }
+
+        // we didn't receive lyrics from tag plugin, try to retrieve it via lyrics engine
+        new LyricsFetcher().execute(getIntent());
     }
 
     /**
@@ -76,26 +93,10 @@ public class LyricsShowActivity extends Activity {
         });
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        // check if this is an answer from tag plugin
-        if (TextUtils.equals(getIntent().getStringExtra(EXTRA_PARAM_P2P), P2P_READ_TAG)) {
-            // already checked this string in service, no need in additional checks
-            String lyrics = getIntent().getStringArrayExtra(EXTRA_PARAM_P2P_VAL)[0];
-            mLyricsText.setText(lyrics);
-            mSwitcher.showNext();
-            return;
-        }
-
-        if (pluginInstalled(this, PluginService.PLUGIN_TAG_EDIT_PKG)) {
-            mWriteFileButton.setVisibility(View.VISIBLE);
-            mWriteFileButton.setOnClickListener(new LyricsShowActivity.LyricsToTagSender());
-        }
-        new LyricsFetcher().execute(getIntent());
-    }
-
+    /**
+     * External lyrics fetcher (using network). Operates asynchronously, notifies dialog when finishes.
+     * On no result (no such lyrics, couldn't fetch etc.) shows toast about this, on success updates dialog text.
+     */
     private class LyricsFetcher extends AsyncTask<Intent, Void, String> {
 
         @Override
@@ -119,13 +120,17 @@ public class LyricsShowActivity extends Activity {
         }
     }
 
+    /**
+     * CLick listener for P2P integration, sends intent to write retrieved lyrics to local file tag
+     */
     private class LyricsToTagSender implements View.OnClickListener {
+
         @Override
         public void onClick(View v) {
             String lyrics = mLyricsText.getText().toString();
             Intent request = new Intent(ACTION_LAUNCH_PLUGIN);
             request.setPackage(PluginService.PLUGIN_TAG_EDIT_PKG);
-            request.putExtra(EXTRA_PARAM_FILE_PATH, getIntent().getStringExtra(EXTRA_PARAM_FILE_PATH));
+            request.putExtra(EXTRA_PARAM_URI, getIntent().getParcelableExtra(EXTRA_PARAM_URI));
             request.putExtra(EXTRA_PARAM_PLUGIN_APP, getApplicationInfo());
             request.putExtra(EXTRA_PARAM_P2P, P2P_WRITE_TAG);
             request.putExtra(EXTRA_PARAM_P2P_KEY, new String[]{"LYRICS"}); // tag name
