@@ -15,6 +15,10 @@ Note that this plugin requires internet connection to be useful.
        without internet connection.
     * Can write lyrics retrieved from wiki to file tags
 
+# Donate
+
+[<img alt="Patreon Page" src="https://s3.amazonaws.com/patreon_public_assets/toolbox/patreon.png" height="100"/>](https://www.patreon.com/kanedias)
+
 # License
 
 Copyright (C) 2016 Oleg Chernovskiy
