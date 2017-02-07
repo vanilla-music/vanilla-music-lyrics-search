@@ -27,6 +27,5 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-compat:24.2.1'
     compile 'org.jsoup:jsoup:1.8.3'     // for parsing lyrics wiki pages
 }

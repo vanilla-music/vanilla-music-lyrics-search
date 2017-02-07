@@ -66,8 +66,7 @@ public class LyricsShowActivity extends Activity {
         if (TextUtils.equals(getIntent().getStringExtra(EXTRA_PARAM_P2P), P2P_READ_TAG)) {
             // already checked this string in service, no need in additional checks
             String lyrics = getIntent().getStringArrayExtra(EXTRA_PARAM_P2P_VAL)[0];
-            mLyricsText.setText(lyrics);
-            mSwitcher.showNext();
+            showFetchedLyrics(lyrics);
             return;
         }
 
@@ -79,6 +78,12 @@ public class LyricsShowActivity extends Activity {
 
         // we didn't receive lyrics from tag plugin, try to retrieve it via lyrics engine
         new LyricsFetcher().execute(getIntent());
+    }
+
+    private void showFetchedLyrics(String lyrics) {
+        mLyricsText.setText(lyrics);
+        mWriteFileButton.setEnabled(true);
+        mSwitcher.showNext();
     }
 
     /**
@@ -115,8 +120,7 @@ public class LyricsShowActivity extends Activity {
                 return;
             }
 
-            mLyricsText.setText(lyrics);
-            mSwitcher.showNext();
+            showFetchedLyrics(lyrics);
         }
     }
 

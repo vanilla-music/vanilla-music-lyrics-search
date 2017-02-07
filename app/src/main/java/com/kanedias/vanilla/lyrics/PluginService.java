@@ -22,7 +22,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -87,7 +86,6 @@ public class PluginService extends Service {
     }
 
 
-    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;

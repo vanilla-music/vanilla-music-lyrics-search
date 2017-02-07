@@ -38,7 +38,7 @@ public class PluginQueryBroadcastReceiver extends BroadcastReceiver {
      */
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.e(PluginConstants.LOG_TAG, "Received query intent!");
+        Log.i(PluginConstants.LOG_TAG, "Received query intent!");
         switch (intent.getAction()) {
             case PluginConstants.ACTION_REQUEST_PLUGIN_PARAMS:
                 intent.setClass(context, PluginService.class);
