@@ -51,6 +51,4 @@ public class PluginConstants {
     static final String P2P_READ_TAG = "READ_TAG";
 
     static final String LOG_TAG = "Vanilla:LyricsPlugin";
-
-    static final String VANILLA_PACKAGE_NAME = "ch.blinkenlights.android.vanilla";
 }

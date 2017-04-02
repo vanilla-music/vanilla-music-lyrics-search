@@ -1,16 +1,25 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion 25
     buildToolsVersion '25.0.0'
 
     defaultConfig {
         applicationId "com.kanedias.vanilla.lyrics"
         minSdkVersion 14
-        targetSdkVersion 24
-        versionCode 4
-        versionName "1.0.3"
+        targetSdkVersion 25
+        versionCode 5
+        versionName "1.0.4"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("/home/adonai/devel/keystore/Adonai")
+            storePassword "release"
+            keyAlias "adonai"
+            keyPassword "release"
+        }
     }
 
     buildTypes {
@@ -20,6 +29,8 @@ android {
 
         release {
             zipAlignEnabled true
+            signingConfig signingConfigs.release
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 

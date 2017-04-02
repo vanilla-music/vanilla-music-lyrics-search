@@ -74,7 +74,7 @@ public class PluginService extends Service {
                 Log.i(LOG_TAG, "Plugin enabled!");
                 break;
             case ACTION_REQUEST_PLUGIN_PARAMS:
-                handleRequestPluginParams();
+                handleRequestPluginParams(intent);
                 break;
             case ACTION_LAUNCH_PLUGIN:
                 handleLaunchPlugin(intent);
@@ -103,10 +103,11 @@ public class PluginService extends Service {
 
     /**
      * Sends plugin info back to Vanilla Music service.
+     * @param intent intent from player
      */
-    private void handleRequestPluginParams() {
+    private void handleRequestPluginParams(Intent intent) {
         Intent answer = new Intent(ACTION_HANDLE_PLUGIN_PARAMS);
-        answer.setPackage(VANILLA_PACKAGE_NAME);
+        answer.setPackage(intent.getPackage());
         answer.putExtra(EXTRA_PARAM_PLUGIN_NAME, getString(R.string.lyrics_search));
         answer.putExtra(EXTRA_PARAM_PLUGIN_APP, getApplicationInfo());
         answer.putExtra(EXTRA_PARAM_PLUGIN_DESC, getString(R.string.plugin_desc));
