@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Vanilla Lyrics Search</string>
+    <string name="lyrics_search">歌詞の検索</string>
+    <string name="plugin_desc">lyrics wikia の歌詞を検索することができます</string>
+    <string name="lyrics_not_found">歌詞が見つかりません!</string>
+    <string name="write_to_file">ファイルに書き込む</string>
+</resources>
