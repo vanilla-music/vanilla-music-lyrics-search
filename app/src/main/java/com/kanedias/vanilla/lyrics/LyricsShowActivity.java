@@ -27,7 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
-import static com.kanedias.vanilla.lyrics.PluginConstants.*;
+import static com.kanedias.vanilla.plugins.PluginConstants.*;
 import static com.kanedias.vanilla.lyrics.PluginService.pluginInstalled;
 
 /**

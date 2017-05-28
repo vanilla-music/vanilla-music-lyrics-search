@@ -17,7 +17,6 @@
 package com.kanedias.vanilla.lyrics;
 
 import android.app.Service;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -27,7 +26,9 @@ import android.util.Log;
 
 import java.util.List;
 
-import static com.kanedias.vanilla.lyrics.PluginConstants.*;
+import com.kanedias.vanilla.plugins.PluginConstants;
+
+import static com.kanedias.vanilla.plugins.PluginConstants.*;
 
 /**
  * Main service of Plugin system.

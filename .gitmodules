@@ -1,0 +1,3 @@
+[submodule "plugin-commons"]
+	path = plugin-commons
+	url = https://github.com/Adonai/vanilla-music-plugin-commons

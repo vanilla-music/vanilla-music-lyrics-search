@@ -38,5 +38,6 @@ android {
 }
 
 dependencies {
+    compile project(':plugin-commons')
     compile 'org.jsoup:jsoup:1.8.3'     // for parsing lyrics wiki pages
 }
