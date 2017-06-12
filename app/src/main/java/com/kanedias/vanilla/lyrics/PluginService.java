@@ -166,14 +166,12 @@ public class PluginService extends Service {
             case P2P_READ_TAG: // this is a reply on our request for lyrics tag
                 Intent dialogIntent = new Intent(this, LyricsShowActivity.class);
                 dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                dialogIntent.putExtras(mOriginalIntent);
 
                 String[] fields = intent.getStringArrayExtra(EXTRA_PARAM_P2P_VAL);
                 if (fields.length > 0 && !TextUtils.isEmpty(fields[0])) {
                     // start activity with retrieved lyrics
                     dialogIntent.putExtras(intent);
-                } else {
-                    // no lyrics - start activity in normal mode
-                    dialogIntent.putExtras(mOriginalIntent);
                 }
                 startActivity(dialogIntent);
                 break;

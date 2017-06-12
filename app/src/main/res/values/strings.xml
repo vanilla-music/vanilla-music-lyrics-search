@@ -3,5 +3,9 @@
     <string name="lyrics_search">Lyrics search</string>
     <string name="plugin_desc">Allows you to search lyrics for songs on lyrics wikia</string>
     <string name="lyrics_not_found">Lyrics not found!</string>
-    <string name="write_to_file">Write to file</string>
+    <string name="write">Write…</string>
+    <string name="write_to_lrc">Write to *.lrc file</string>
+    <string name="write_to_tag">Write to file tag</string>
+    <string name="file_written_successfully">File written successfully!</string>
+    <string name="error_writing_file">File write error: </string>
 </resources>

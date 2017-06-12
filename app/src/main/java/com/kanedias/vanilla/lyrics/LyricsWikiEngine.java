@@ -142,7 +142,7 @@ public class LyricsWikiEngine implements LyricsEngine {
     }
 
     // Reads an InputStream and converts it to a String.
-    public String readIt(InputStream stream) throws IOException {
+    public static String readIt(InputStream stream) throws IOException {
         Reader reader = new InputStreamReader(stream, "UTF-8");
         StringWriter sw = new StringWriter();
         char[] buffer = new char[4096];
