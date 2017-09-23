@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Vanilla dalszövegkereső</string>
+    <string name="lyrics_search">Dalszövegkereső</string>
+    <string name="plugin_desc">A segítségével dalszövegeket kereshet a számokhoz a wikián</string>
+    <string name="lyrics_not_found">Nem található dalszöveg.</string>
+    <string name="write">Írás…</string>
+    <string name="write_to_lrc">Kiírás *.lrc fájlba</string>
+    <string name="write_to_tag">Írás fájl címkébe</string>
+    <string name="file_written_successfully">A fájl kiírása sikeres.</string>
+    <string name="error_writing_file">Fájl írási hiba: </string>
+</resources>
