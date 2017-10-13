@@ -30,7 +30,7 @@
         <activity
             android:name=".LyricsShowActivity"
             android:excludeFromRecents="true"
-            android:theme="@android:style/Theme.DeviceDefault.Dialog" />
+            android:theme="@style/DialogTheme" />
         <activity
             android:name="com.kanedias.vanilla.plugins.saf.SafRequestActivity"
             android:theme="@android:style/Theme.DeviceDefault.Dialog"

@@ -16,7 +16,6 @@
  */
 package com.kanedias.vanilla.lyrics;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -30,11 +29,16 @@ import android.support.annotation.NonNull;
 import android.support.v4.provider.DocumentFile;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
+
+import com.kanedias.vanilla.plugins.DialogActivity;
 import com.kanedias.vanilla.plugins.PluginConstants;
 import com.kanedias.vanilla.plugins.PluginUtils;
 import com.kanedias.vanilla.plugins.saf.SafRequestActivity;
@@ -46,6 +50,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 import static com.kanedias.vanilla.plugins.PluginConstants.*;
 import static com.kanedias.vanilla.lyrics.PluginService.pluginInstalled;
 import static com.kanedias.vanilla.plugins.PluginUtils.checkAndRequestPermissions;
@@ -61,7 +67,7 @@ import static com.kanedias.vanilla.plugins.saf.SafUtils.isSafNeeded;
  *
  * @author Oleg Chernovskiy
  */
-public class LyricsShowActivity extends Activity {
+public class LyricsShowActivity extends DialogActivity {
 
     private SharedPreferences mPrefs;
 
@@ -84,12 +90,47 @@ public class LyricsShowActivity extends Activity {
         mOkButton = (Button) findViewById(R.id.ok_button);
 
         setupUI();
-        handlePassedIntent(); // called in onCreate to be shown only once
+        handlePassedIntent(true); // called in onCreate to be shown only once
     }
 
-    private void handlePassedIntent() {
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = new MenuInflater(this);
+        inflater.inflate(R.menu.lyrics_options, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        for (int i = 0; i < menu.size(); i++) {
+            MenuItem item = menu.getItem(i);
+            switch (item.getItemId()) {
+                case R.id.reload_option:
+                    // show only when loading is complete
+                    item.setVisible(mSwitcher.getDisplayedChild() == 1);
+                    continue;
+                default:
+                    break;
+            }
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.reload_option:
+                // show loading circle
+                mSwitcher.setDisplayedChild(0);
+                handlePassedIntent(false);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void handlePassedIntent(boolean useLocal) {
         // check if this is an answer from tag plugin
-        if (TextUtils.equals(getIntent().getStringExtra(EXTRA_PARAM_P2P), P2P_READ_TAG)) {
+        if (useLocal && TextUtils.equals(getIntent().getStringExtra(EXTRA_PARAM_P2P), P2P_READ_TAG)) {
             // already checked this string in service, no need in additional checks
             String lyrics = getIntent().getStringArrayExtra(EXTRA_PARAM_P2P_VAL)[0];
             showFetchedLyrics(lyrics);
@@ -97,7 +138,7 @@ public class LyricsShowActivity extends Activity {
         }
 
         // try to load from *.lrc file nearby
-        if (loadFromFile()) {
+        if (useLocal && loadFromFile()) {
             return;
         }
 
@@ -139,9 +180,16 @@ public class LyricsShowActivity extends Activity {
      * @param lyrics retrieved song lyrics
      */
     private void showFetchedLyrics(String lyrics) {
+        if (TextUtils.isEmpty(lyrics)) {
+            // nothing found
+            mWriteButton.setEnabled(false);
+        } else {
+            // some lyrics was extracted
+            mWriteButton.setEnabled(true);
+        }
         mLyricsText.setText(lyrics);
-        mWriteButton.setEnabled(true);
-        mSwitcher.showNext();
+        mSwitcher.setDisplayedChild(1);
+        invalidateOptionsMenu();
     }
 
     /**
@@ -174,9 +222,7 @@ public class LyricsShowActivity extends Activity {
         protected void onPostExecute(String lyrics) {
             if (TextUtils.isEmpty(lyrics)) {
                 // no lyrics - show excuse
-                finish();
                 Toast.makeText(LyricsShowActivity.this, R.string.lyrics_not_found, Toast.LENGTH_SHORT).show();
-                return;
             }
 
             showFetchedLyrics(lyrics);
