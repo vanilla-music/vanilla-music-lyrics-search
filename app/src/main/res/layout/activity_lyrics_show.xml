@@ -9,35 +9,29 @@
     android:paddingTop="8dp"
     tools:context=".LyricsShowActivity">
 
-    <ScrollView
+    <ViewSwitcher
+        android:id="@+id/loading_switcher"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:fadeScrollbars="false"
         android:paddingBottom="5dp">
 
-        <ViewSwitcher
-            android:id="@+id/loading_switcher"
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:padding="5dp" />
+
+        <TextView
+            android:id="@+id/lyrics_text"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|center_horizontal"
+            android:scrollbars="vertical"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
 
-            <ProgressBar
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:indeterminate="true"
-                android:padding="5dp" />
-
-            <TextView
-                android:id="@+id/lyrics_text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top|center_horizontal"
-                android:textAppearance="?android:attr/textAppearanceSmall" />
-
-        </ViewSwitcher>
-
-    </ScrollView>
+    </ViewSwitcher>
 
     <LinearLayout
         android:layout_width="match_parent"

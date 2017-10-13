@@ -28,6 +28,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.provider.DocumentFile;
 import android.text.TextUtils;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -50,8 +51,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.view.View.GONE;
-import static android.view.View.VISIBLE;
 import static com.kanedias.vanilla.plugins.PluginConstants.*;
 import static com.kanedias.vanilla.lyrics.PluginService.pluginInstalled;
 import static com.kanedias.vanilla.plugins.PluginUtils.checkAndRequestPermissions;
@@ -196,6 +195,7 @@ public class LyricsShowActivity extends DialogActivity {
      * Initialize UI elements with handlers and action listeners
      */
     private void setupUI() {
+        mLyricsText.setMovementMethod(new ScrollingMovementMethod());
         mWriteButton.setOnClickListener(new SelectWriteAction());
         mOkButton.setOnClickListener(new View.OnClickListener() {
             @Override
