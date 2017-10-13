@@ -21,7 +21,7 @@ Note that this plugin requires internet connection to be useful.
 
 # License
 
-    Copyright (C) 2016 Oleg Chernovskiy
+    Copyright (C) 2016-2017 Oleg `Kanedias` Chernovskiy
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
