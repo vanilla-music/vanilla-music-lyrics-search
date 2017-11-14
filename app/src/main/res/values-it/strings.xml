@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Ricerca testi di Vanilla</string>
+    <string name="lyrics_search">Cerca testo</string>
+    <string name="plugin_desc">Ti permette di cercare i testi delle canzoni su LyricWiki</string>
+    <string name="lyrics_not_found">Testo non trovato!</string>
+    <string name="write">Scrivi…</string>
+    <string name="write_to_lrc">Scrivi su un file .lrc</string>
+    <string name="write_to_tag">Scrivi nel tag del file</string>
+    <string name="file_written_successfully">File scritto con successo!</string>
+    <string name="error_writing_file">Errore durante la scrittura del file:</string>
+    <string name="reload">Ricarica</string>
+</resources>

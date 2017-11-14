@@ -287,7 +287,7 @@ public class LyricsShowActivity extends DialogActivity {
         String lrcFilename = lyricsForFile(mediaFile);
         File lrcTarget = new File(mediaFile.getParent(), lrcFilename);
         byte[] data = mLyricsText.getText().toString().getBytes(Charset.forName("UTF-8"));
-        if (isSafNeeded(mediaFile)) {
+        if (isSafNeeded(mediaFile, this)) {
             if (mPrefs.contains(PREF_SDCARD_URI)) {
                 // we already got the permission!
                 writeThroughSaf(data, mediaFile, lrcTarget.getName());
