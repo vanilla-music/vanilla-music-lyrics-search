@@ -13,8 +13,8 @@ android {
         applicationId "com.kanedias.vanilla.lyrics"
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 7
-        versionName "1.2.0"
+        versionCode 8
+        versionName "1.2.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
