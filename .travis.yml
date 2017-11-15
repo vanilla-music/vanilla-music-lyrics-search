@@ -10,7 +10,7 @@ android:
   - platform-tools
   - extra-google-m2repository
   - extra-android-m2repository
-  - build-tools-25.0.3
+  - build-tools-26.0.2
   - android-25
 before_cache:
 - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
