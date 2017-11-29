@@ -26,6 +26,6 @@ deploy:
   provider: releases
   api_key:
     secure: U9HrK14tnf8hLY5qRbvg5rwlkVJiES7F5Ompz02XjaxnT7+ujTxNnCa31A7jiWm0N/vhJontfDJcP0NAAx6Ey3WXEa8P1O36VnHBDPoa2CmqX7t3o4xMJUOTqCbthdl2QGXZMPBuaekihAvzvQeiKHwE/5YCdGW5/FvTBTbm3bQdDiq7depcyd8ZY26CmTMt39pl+R8DLPOxv0D/CxNyXME6PifqMW4xAbvTGTOUM0JJq082ubY8Q3+sVDwcayYDMz6gE8PJRX4XHLCE0dNo9UqdY+VhgcfR/PTAURTpEnknojygrdznmoWFa4yoZ/+Y4Y+hWmhnlAHnDrv2iqWewB+6YzvwHH4MzpafIkJ1mZzFjyjfA83xFfa4nmTzaYWYC/KdJNmwHc1+LqnOHrQ54bY1Aw7ZiSgUTpEEdd/DPIzRS97MMejP0cTM9fpN/B6S/jgPflKYoZBkLnpnn2hz+yN08Bim9RIhIJTaxVquYZeFPDDoTZoDBb4uxwdgB87Dm52GPxWtCpbQAYwrb2m1MXr8O3PmEzpbWdXOYL7VKF9PuIukqY40HehDbS7bJQQtUD5uNm3nKlu3cZdVzbLO9gcG2yUXGXu4vNS3i0kj5nKCg3L2EKTO6pXBwhxQp/iJzKb+CMrO7npM9pu0CnTKN6tjASVKeXPrlokHI7DW/30=
-  file: app/build/outputs/apk/app-debug.apk
+  file: app/build/outputs/apk/debug/app-debug.apk
   on:
     tags: true
