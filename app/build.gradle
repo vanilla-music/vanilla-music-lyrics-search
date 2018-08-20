@@ -1,8 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 27
 
     lintOptions {
         disable 'MissingTranslation'
@@ -12,7 +11,7 @@ android {
     defaultConfig {
         applicationId "com.kanedias.vanilla.lyrics"
         minSdkVersion 14
-        targetSdkVersion 25
+        targetSdkVersion 27
         versionCode 9
         versionName "1.2.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -43,6 +42,6 @@ android {
 }
 
 dependencies {
-    compile project(':plugin-commons')
-    compile 'org.jsoup:jsoup:1.10.3'     // for parsing lyrics wiki pages
+    implementation project(':plugin-commons')
+    implementation 'org.jsoup:jsoup:1.10.3'     // for parsing lyrics wiki pages
 }
