@@ -17,7 +17,6 @@
 package com.kanedias.vanilla.lyrics;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -44,15 +43,29 @@ import com.kanedias.vanilla.plugins.PluginConstants;
 import com.kanedias.vanilla.plugins.PluginUtils;
 import com.kanedias.vanilla.plugins.saf.SafRequestActivity;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static com.kanedias.vanilla.plugins.PluginConstants.*;
 import static com.kanedias.vanilla.lyrics.PluginService.pluginInstalled;
+import static com.kanedias.vanilla.plugins.PluginConstants.ACTION_LAUNCH_PLUGIN;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_P2P;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_P2P_KEY;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_P2P_VAL;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_PLUGIN_APP;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_SONG_ARTIST;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_SONG_TITLE;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_URI;
+import static com.kanedias.vanilla.plugins.PluginConstants.LOG_TAG;
+import static com.kanedias.vanilla.plugins.PluginConstants.P2P_READ_TAG;
+import static com.kanedias.vanilla.plugins.PluginConstants.P2P_WRITE_TAG;
+import static com.kanedias.vanilla.plugins.PluginConstants.PREF_SDCARD_URI;
 import static com.kanedias.vanilla.plugins.PluginUtils.checkAndRequestPermissions;
 import static com.kanedias.vanilla.plugins.saf.SafUtils.findInDocumentTree;
 import static com.kanedias.vanilla.plugins.saf.SafUtils.isSafNeeded;
@@ -83,10 +96,10 @@ public class LyricsShowActivity extends DialogActivity {
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        mSwitcher = (ViewSwitcher) findViewById(R.id.loading_switcher);
-        mLyricsText = (TextView) findViewById(R.id.lyrics_text);
-        mWriteButton = (Button) findViewById(R.id.write_button);
-        mOkButton = (Button) findViewById(R.id.ok_button);
+        mSwitcher = findViewById(R.id.loading_switcher);
+        mLyricsText = findViewById(R.id.lyrics_text);
+        mWriteButton = findViewById(R.id.write_button);
+        mOkButton = findViewById(R.id.ok_button);
 
         setupUI();
         handlePassedIntent(true); // called in onCreate to be shown only once
@@ -197,12 +210,7 @@ public class LyricsShowActivity extends DialogActivity {
     private void setupUI() {
         mLyricsText.setMovementMethod(new ScrollingMovementMethod());
         mWriteButton.setOnClickListener(new SelectWriteAction());
-        mOkButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        mOkButton.setOnClickListener(v -> finish());
     }
 
     /**
@@ -230,40 +238,21 @@ public class LyricsShowActivity extends DialogActivity {
     }
 
     /**
-     * CLick listener for P2P integration, sends intent to write retrieved lyrics to local file tag or to
-     * lyrics file
+     * Write to *.lrc file through file-based API
+     * @param data - data to write
+     * @param original - original media file that was requested by user
+     * @param target - target file for writing metadata into
      */
-    private class SelectWriteAction implements View.OnClickListener {
+    private void writeThroughFile(byte[] data, File original, File target) {
+        try {
+            FileOutputStream fos = new FileOutputStream(target);
+            fos.write(data);
+            fos.close();
 
-        @Override
-        public void onClick(View v) {
-            List<String> actions = new ArrayList<>();
-            actions.add(getString(R.string.write_to_lrc));
-
-            // if tag editor is installed, show `write to tag` button
-            if (pluginInstalled(LyricsShowActivity.this, PluginService.PLUGIN_TAG_EDIT_PKG)) {
-                actions.add(getString(R.string.write_to_tag));
-            }
-
-            new AlertDialog.Builder(LyricsShowActivity.this)
-                    .setItems(actions.toArray(new CharSequence[0]), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            switch (which) {
-                                case 0: // to lyrics file
-                                    // onResume will fire both on first launch and on return from permission request
-                                    if (!checkAndRequestPermissions(LyricsShowActivity.this, WRITE_EXTERNAL_STORAGE)) {
-                                        return;
-                                    }
-
-                                    persistAsLrcFile();
-                                    break;
-                                case 1: // to media file tag
-                                    writeToFileTag();
-                                    break;
-                            }
-                        }
-                    }).create().show();
+            Toast.makeText(this, R.string.file_written_successfully, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, getString(R.string.error_writing_file) + e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+            Log.e(LOG_TAG, "Failed to write to file descriptor provided by SAF!", e);
         }
     }
 
@@ -365,32 +354,13 @@ public class LyricsShowActivity extends DialogActivity {
     }
 
     /**
-     * Write to *.lrc file through file-based API
-     * @param data - data to write
-     * @param original - original media file that was requested by user
-     * @param target - target file for writing metadata into
-     */
-    private void writeThroughFile(byte[] data, File  original, File target) {
-        try {
-            FileOutputStream fos = new FileOutputStream(target);
-            fos.write(data);
-            fos.close();
-
-            Toast.makeText(this, R.string.file_written_successfully, Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            Toast.makeText(this, getString(R.string.error_writing_file) + e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-            Log.e(LOG_TAG, "Failed to write to file descriptor provided by SAF!", e);
-        }
-    }
-
-    /**
      * Write to the song tag using Tag Editor Plugin
      */
     private void writeToFileTag() {
         String lyrics = mLyricsText.getText().toString();
         Intent request = new Intent(ACTION_LAUNCH_PLUGIN);
         request.setPackage(PluginService.PLUGIN_TAG_EDIT_PKG);
-        request.putExtra(EXTRA_PARAM_URI, getIntent().getParcelableExtra(EXTRA_PARAM_URI));
+        request.putExtra(EXTRA_PARAM_URI, (Bundle) getIntent().getParcelableExtra(EXTRA_PARAM_URI));
         request.putExtra(EXTRA_PARAM_PLUGIN_APP, getApplicationInfo());
         request.putExtra(EXTRA_PARAM_P2P, P2P_WRITE_TAG);
         request.putExtra(EXTRA_PARAM_P2P_KEY, new String[]{"LYRICS"}); // tag name
@@ -398,4 +368,38 @@ public class LyricsShowActivity extends DialogActivity {
         startService(request);
     }
 
+    /**
+     * CLick listener for P2P integration, sends intent to write retrieved lyrics to local file tag or to
+     * lyrics file
+     */
+    private class SelectWriteAction implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            List<String> actions = new ArrayList<>();
+            actions.add(getString(R.string.write_to_lrc));
+
+            // if tag editor is installed, show `write to tag` button
+            if (pluginInstalled(LyricsShowActivity.this, PluginService.PLUGIN_TAG_EDIT_PKG)) {
+                actions.add(getString(R.string.write_to_tag));
+            }
+
+            new AlertDialog.Builder(LyricsShowActivity.this)
+                    .setItems(actions.toArray(new CharSequence[0]), (dialog, which) -> {
+                        switch (which) {
+                            case 0: // to lyrics file
+                                // onResume will fire both on first launch and on return from permission request
+                                if (!checkAndRequestPermissions(LyricsShowActivity.this, WRITE_EXTERNAL_STORAGE)) {
+                                    return;
+                                }
+
+                                persistAsLrcFile();
+                                break;
+                            case 1: // to media file tag
+                                writeToFileTag();
+                                break;
+                        }
+                    }).create().show();
+        }
+    }
 }

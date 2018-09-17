@@ -12,7 +12,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.nodes.TextNode;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -153,5 +152,4 @@ public class LyricsWikiEngine implements LyricsEngine {
 
         return sw.toString();
     }
-
 }

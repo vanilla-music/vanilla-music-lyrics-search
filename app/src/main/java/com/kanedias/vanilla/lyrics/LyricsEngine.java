@@ -2,7 +2,6 @@ package com.kanedias.vanilla.lyrics;
 
 import android.content.Loader;
 import android.os.HandlerThread;
-
 /**
  * Interface for various engines for lyrics extraction
  *
