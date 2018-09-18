@@ -160,7 +160,22 @@ public class LyricsShowActivity extends DialogActivity {
     }
 
     /**
+     * Retrieves companion name for lyrics file from media passed
+     *
+     * @param mediaFile - original media file that the lyrics was requested for
+     * @return string representing name with extension for lyrics companion file
+     */
+    @NonNull
+    private static String lyricsForFile(File mediaFile) {
+        String mfName = mediaFile.getName();
+        return mfName.indexOf(".") > 0
+                ? mfName.substring(0, mfName.lastIndexOf(".")) + ".lrc"
+                : mfName + ".lrc";
+    }
+
+    /**
      * Try to load lyrics tag from companion *.lrc file nearby
+     *
      * @return true if lyrics was loaded from file, false otherwise
      */
     private boolean loadFromFile() {
@@ -184,24 +199,6 @@ public class LyricsShowActivity extends DialogActivity {
             return false;
         }
         return true;
-    }
-
-    /**
-     * Stop spinning animation and show lyrics for the song.
-     * Write button wil lbe active after that as lyrics will be available for persisting.
-     * @param lyrics retrieved song lyrics
-     */
-    private void showFetchedLyrics(String lyrics) {
-        if (TextUtils.isEmpty(lyrics)) {
-            // nothing found
-            mWriteButton.setEnabled(false);
-        } else {
-            // some lyrics was extracted
-            mWriteButton.setEnabled(true);
-        }
-        mLyricsText.setText(lyrics);
-        mSwitcher.setDisplayedChild(1);
-        invalidateOptionsMenu();
     }
 
     /**
@@ -238,22 +235,22 @@ public class LyricsShowActivity extends DialogActivity {
     }
 
     /**
-     * Write to *.lrc file through file-based API
-     * @param data - data to write
-     * @param original - original media file that was requested by user
-     * @param target - target file for writing metadata into
+     * Stop spinning animation and show lyrics for the song.
+     * Write button wil lbe active after that as lyrics will be available for persisting.
+     *
+     * @param lyrics retrieved song lyrics
      */
-    private void writeThroughFile(byte[] data, File original, File target) {
-        try {
-            FileOutputStream fos = new FileOutputStream(target);
-            fos.write(data);
-            fos.close();
-
-            Toast.makeText(this, R.string.file_written_successfully, Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            Toast.makeText(this, getString(R.string.error_writing_file) + e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-            Log.e(LOG_TAG, "Failed to write to file descriptor provided by SAF!", e);
+    private void showFetchedLyrics(String lyrics) {
+        if (TextUtils.isEmpty(lyrics)) {
+            // nothing found
+            mWriteButton.setEnabled(false);
+        } else {
+            // some lyrics was extracted
+            mWriteButton.setEnabled(true);
         }
+        mLyricsText.setText(lyrics);
+        mSwitcher.setDisplayedChild(1);
+        invalidateOptionsMenu();
     }
 
     /**
@@ -296,16 +293,23 @@ public class LyricsShowActivity extends DialogActivity {
     }
 
     /**
-     * Retrieves companion name for lyrics file from media passed
-     * @param mediaFile - original media file that the lyrics was requested for
-     * @return string representing name with extension for lyrics companion file
+     * Write to *.lrc file through file-based API
+     *
+     * @param data     - data to write
+     * @param original - original media file that was requested by user
+     * @param target   - target file for writing metadata into
      */
-    @NonNull
-    private static String lyricsForFile(File mediaFile) {
-        String mfName = mediaFile.getName();
-        return mfName.indexOf(".") > 0
-                ? mfName.substring(0, mfName.lastIndexOf(".")) + ".lrc"
-                : mfName + ".lrc";
+    private void writeThroughFile(byte[] data, File original, File target) {
+        try {
+            FileOutputStream fos = new FileOutputStream(target);
+            fos.write(data);
+            fos.close();
+
+            Toast.makeText(this, R.string.file_written_successfully, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(this, getString(R.string.error_writing_file) + e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+            Log.e(LOG_TAG, "Failed to write to file descriptor provided by SAF!", e);
+        }
     }
 
     /**

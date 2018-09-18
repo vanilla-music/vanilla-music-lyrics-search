@@ -94,7 +94,7 @@ public class LyricsWikiEngine implements LyricsEngine {
 
             return getLyricsUrl(getSongAnswer);
         } finally {
-            if(apiCall != null) {
+            if (apiCall != null) {
                 apiCall.disconnect();
             }
         }
@@ -106,7 +106,7 @@ public class LyricsWikiEngine implements LyricsEngine {
     private String parseFullLyricsPage(String lyricsUrl) throws IOException {
         Document page = Jsoup.parse(new URL(lyricsUrl), 10_000);
         Element lyricsBox = page.select("div.lyricbox").first();
-        if(lyricsBox == null) { // no lyrics frame on page
+        if (lyricsBox == null) { // no lyrics frame on page
             return null;
         }
 
@@ -116,8 +116,8 @@ public class LyricsWikiEngine implements LyricsEngine {
         lyricsBox.select("script").remove();
 
         StringBuilder builder = new StringBuilder();
-        for(Node curr : lyricsBox.childNodes()) {
-            if(curr instanceof TextNode) {
+        for (Node curr : lyricsBox.childNodes()) {
+            if (curr instanceof TextNode) {
                 builder.append(((TextNode) curr).text());
             } else {
                 builder.append("\n");
@@ -130,7 +130,7 @@ public class LyricsWikiEngine implements LyricsEngine {
     private String getLyricsUrl(JSONObject getSongAnswer) {
         try {
             String pageId = getSongAnswer.getString("page_id");
-            if(TextUtils.isEmpty(pageId)) {
+            if (TextUtils.isEmpty(pageId)) {
                 return null; // empty page_id means page wasn't created
             }
             return getSongAnswer.getString("url");

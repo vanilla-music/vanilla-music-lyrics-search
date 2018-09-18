@@ -117,6 +117,7 @@ public class PluginService extends Service {
 
     /**
      * Sends plugin info back to Vanilla Music service.
+     *
      * @param intent intent from player
      */
     private void handleRequestPluginParams(Intent intent) {
