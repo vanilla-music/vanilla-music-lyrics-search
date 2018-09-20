@@ -1,4 +1,4 @@
-# Vanilla Music player Lyrics Search plugin
+# Vanilla Music Player Lyrics Search plugin
 
 This repository hosts plugin for Vanilla Music.
 Prior to use it you should have [Vanilla Music player](https://github.com/vanilla-music/vanilla) installed

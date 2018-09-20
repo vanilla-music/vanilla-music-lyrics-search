@@ -1,17 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 27
-
-    lintOptions {
-        disable 'MissingTranslation'
-        disable 'ExtraTranslation'
-    }
-
+    compileSdkVersion 28
+	buildToolsVersion '28.0.2'
     defaultConfig {
         applicationId "com.kanedias.vanilla.lyrics"
         minSdkVersion 14
-        targetSdkVersion 27
+        targetSdkVersion 28
         versionCode 9
         versionName "1.2.2"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -27,21 +22,26 @@ android {
     }
 
     buildTypes {
-        debug {
-            applicationIdSuffix '.dbg'
-        }
+        debug {}
 
         release {
-            zipAlignEnabled true
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 
+	compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 
+	lintOptions {
+        disable 'MissingTranslation'
+        disable 'ExtraTranslation'
+    }
 }
 
 dependencies {
     implementation project(':plugin-commons')
-    implementation 'org.jsoup:jsoup:1.10.3'     // for parsing lyrics wiki pages
+    implementation 'org.jsoup:jsoup:1.11.3'		// for parsing lyrics wiki pages
 }

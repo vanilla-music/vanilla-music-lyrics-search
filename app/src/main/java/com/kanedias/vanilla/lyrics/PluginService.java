@@ -20,15 +20,28 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.util.List;
-
 import com.kanedias.vanilla.plugins.PluginConstants;
 
-import static com.kanedias.vanilla.plugins.PluginConstants.*;
+import java.util.List;
+
+import static com.kanedias.vanilla.plugins.PluginConstants.ACTION_HANDLE_PLUGIN_PARAMS;
+import static com.kanedias.vanilla.plugins.PluginConstants.ACTION_LAUNCH_PLUGIN;
+import static com.kanedias.vanilla.plugins.PluginConstants.ACTION_REQUEST_PLUGIN_PARAMS;
+import static com.kanedias.vanilla.plugins.PluginConstants.ACTION_WAKE_PLUGIN;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_P2P;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_P2P_KEY;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_P2P_VAL;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_PLUGIN_APP;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_PLUGIN_DESC;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_PLUGIN_NAME;
+import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_URI;
+import static com.kanedias.vanilla.plugins.PluginConstants.LOG_TAG;
+import static com.kanedias.vanilla.plugins.PluginConstants.P2P_READ_TAG;
 
 /**
  * Main service of Plugin system.
@@ -104,6 +117,7 @@ public class PluginService extends Service {
 
     /**
      * Sends plugin info back to Vanilla Music service.
+     *
      * @param intent intent from player
      */
     private void handleRequestPluginParams(Intent intent) {
@@ -121,7 +135,7 @@ public class PluginService extends Service {
             mOriginalIntent = intent;
             Intent readLyrics = new Intent(ACTION_LAUNCH_PLUGIN);
             readLyrics.setPackage(PluginService.PLUGIN_TAG_EDIT_PKG);
-            readLyrics.putExtra(EXTRA_PARAM_URI, intent.getParcelableExtra(EXTRA_PARAM_URI));
+            readLyrics.putExtra(EXTRA_PARAM_URI, (Bundle) intent.getParcelableExtra(EXTRA_PARAM_URI));
             readLyrics.putExtra(EXTRA_PARAM_PLUGIN_APP, getApplicationInfo());
             readLyrics.putExtra(EXTRA_PARAM_P2P, P2P_READ_TAG);
             readLyrics.putExtra(EXTRA_PARAM_P2P_KEY, new String[]{"LYRICS"}); // tag name
