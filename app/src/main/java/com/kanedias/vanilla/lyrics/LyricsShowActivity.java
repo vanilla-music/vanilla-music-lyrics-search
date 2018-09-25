@@ -29,7 +29,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.provider.DocumentFile;
 import android.text.TextUtils;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -57,6 +56,7 @@ import java.util.List;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static com.kanedias.vanilla.plugins.PluginConstants.*;
 import static com.kanedias.vanilla.plugins.PluginUtils.checkAndRequestPermissions;
+import static com.kanedias.vanilla.plugins.PluginUtils.havePermissions;
 import static com.kanedias.vanilla.plugins.saf.SafUtils.findInDocumentTree;
 import static com.kanedias.vanilla.plugins.saf.SafUtils.isSafNeeded;
 
@@ -104,6 +104,12 @@ public class LyricsShowActivity extends DialogActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (handleLaunchPlugin()) {
+            // no UI was required for handling the intent
+            return;
+        }
+
         setContentView(R.layout.activity_lyrics_show);
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -113,7 +119,6 @@ public class LyricsShowActivity extends DialogActivity {
         mWriteButton = findViewById(R.id.write_button);
         mOkButton = findViewById(R.id.ok_button);
 
-        handleLaunchPlugin(getIntent(), true);
         setupUI();
     }
 
@@ -146,37 +151,75 @@ public class LyricsShowActivity extends DialogActivity {
             case R.id.reload_option:
                 // show loading circle
                 mSwitcher.setDisplayedChild(0);
-                handleLaunchPlugin(getIntent(), false);
+                handleUiIntent(false);
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void handleLaunchPlugin(Intent intent, boolean useLocal) {
+    /**
+     * Handle incoming intent that may possible be ping, other plugin request or user-interactive plugin request
+     * @return true if intent was handled internally, false if activity startup is required
+     */
+    private boolean handleLaunchPlugin() {
         if (TextUtils.equals(getIntent().getAction(), ACTION_WAKE_PLUGIN)) {
             // just show that we're okay
             Log.i(LOG_TAG, "Plugin enabled!");
             finish();
-            return;
+            return true;
         }
 
-        if (useLocal && pluginInstalled(this, PLUGIN_TAG_EDIT_PKG) && !getIntent().hasExtra(EXTRA_PARAM_P2P)) {
+        if (pluginInstalled(this, PLUGIN_TAG_EDIT_PKG) && !getIntent().hasExtra(EXTRA_PARAM_P2P)) {
             // it's user-requested, try to retrieve lyrics from the tag first
             Intent readLyrics = new Intent(ACTION_LAUNCH_PLUGIN);
             readLyrics.setPackage(PLUGIN_TAG_EDIT_PKG);
-            readLyrics.putExtra(EXTRA_PARAM_URI, (Uri) intent.getParcelableExtra(EXTRA_PARAM_URI));
+            readLyrics.putExtra(EXTRA_PARAM_URI, (Uri) getIntent().getParcelableExtra(EXTRA_PARAM_URI));
             readLyrics.putExtra(EXTRA_PARAM_PLUGIN_APP, getApplicationInfo());
             readLyrics.putExtra(EXTRA_PARAM_P2P, P2P_READ_TAG);
             readLyrics.putExtra(EXTRA_PARAM_P2P_KEY, new String[]{"LYRICS"}); // tag name
             readLyrics.putExtras(getIntent());
             startActivity(readLyrics);
             finish(); // end this activity instance, it will be re-created by incoming intent from Tag Editor
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        handleUiIntent(true);
+
+        if (getIntent().hasExtra(EXTRA_PARAM_SAF_P2P)) {
+            // it's the answer from SAF activity, persist
+            persistAsLrcFile();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // we only request one permission
+        if (!havePermissions(this, WRITE_EXTERNAL_STORAGE)) {
+            // user denied our request, leave activity as-is
             return;
         }
 
+        // we have write permission, continue with persist
+        persistAsLrcFile();
+    }
+
+    /**
+     * Handle user-interactive intent after activity was initialized
+     * @param useLocal true if tag info or *.lrc file can be used to retrieve lyrics, false if only network is allowed
+     */
+    private void handleUiIntent(boolean useLocal) {
         // check if this is an answer from tag plugin
         if (useLocal && TextUtils.equals(getIntent().getStringExtra(EXTRA_PARAM_P2P), P2P_READ_TAG)) {
-            String[] fields = intent.getStringArrayExtra(EXTRA_PARAM_P2P_VAL);
+            String[] fields = getIntent().getStringArrayExtra(EXTRA_PARAM_P2P_VAL);
             if (fields != null && fields.length > 0 && !TextUtils.isEmpty(fields[0])) {
                 // start activity with retrieved lyrics
                 String lyrics = getIntent().getStringArrayExtra(EXTRA_PARAM_P2P_VAL)[0];
@@ -352,6 +395,7 @@ public class LyricsShowActivity extends DialogActivity {
             safIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             safIntent.putExtras(getIntent());
             startActivity(safIntent);
+            finish();
             // it will pass us URI back after the work is done
         } else {
             writeThroughFile(data, lrcTarget);
@@ -463,7 +507,6 @@ public class LyricsShowActivity extends DialogActivity {
                     .setItems(actions.toArray(new CharSequence[0]), (dialog, which) -> {
                         switch (which) {
                             case 0: // to lyrics file
-                                // onResume will fire both on first launch and on return from permission request
                                 if (!checkAndRequestPermissions(LyricsShowActivity.this, WRITE_EXTERNAL_STORAGE)) {
                                     return;
                                 }
