@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2017 Oleg `Kanedias` Chernovskiy <adonai@xaker.ru>
+ * Copyright (C) 2016-2018 Oleg `Kanedias` Chernovskiy <adonai@xaker.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,10 @@
 package com.kanedias.vanilla.lyrics;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -53,19 +55,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static com.kanedias.vanilla.lyrics.PluginService.pluginInstalled;
-import static com.kanedias.vanilla.plugins.PluginConstants.ACTION_LAUNCH_PLUGIN;
-import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_P2P;
-import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_P2P_KEY;
-import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_P2P_VAL;
-import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_PLUGIN_APP;
-import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_SONG_ARTIST;
-import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_SONG_TITLE;
-import static com.kanedias.vanilla.plugins.PluginConstants.EXTRA_PARAM_URI;
-import static com.kanedias.vanilla.plugins.PluginConstants.LOG_TAG;
-import static com.kanedias.vanilla.plugins.PluginConstants.P2P_READ_TAG;
-import static com.kanedias.vanilla.plugins.PluginConstants.P2P_WRITE_TAG;
-import static com.kanedias.vanilla.plugins.PluginConstants.PREF_SDCARD_URI;
+import static com.kanedias.vanilla.plugins.PluginConstants.*;
 import static com.kanedias.vanilla.plugins.PluginUtils.checkAndRequestPermissions;
 import static com.kanedias.vanilla.plugins.saf.SafUtils.findInDocumentTree;
 import static com.kanedias.vanilla.plugins.saf.SafUtils.isSafNeeded;
@@ -75,11 +65,33 @@ import static com.kanedias.vanilla.plugins.saf.SafUtils.isSafNeeded;
  * if one chooses it as the requested plugin.
  * <p/>
  *
- * @see PluginService service that launches this
+ * This activity must be able to handle ACTION_WAKE_PLUGIN and ACTION_LAUNCH_PLUGIN
+ * intents coming from Vanilla Music.
+ *
+ * <p/>
+ * Casual conversation looks like this:
+ * <pre>
+ *     VanillaMusic                                 Plugin
+ *          |                                         |
+ *          |       ACTION_WAKE_PLUGIN broadcast      |
+ *          |---------------------------------------->| (plugin init if just installed)
+ *          |                                         |
+ *          | ACTION_REQUEST_PLUGIN_PARAMS broadcast  |
+ *          |---------------------------------------->| (this is handled by BroadcastReceiver)
+ *          |                                         |
+ *          |      ACTION_HANDLE_PLUGIN_PARAMS        |
+ *          |<----------------------------------------| (plugin answer with name and desc)
+ *          |                                         |
+ *          |           ACTION_LAUNCH_PLUGIN          |
+ *          |---------------------------------------->| (plugin is allowed to show window)
+ * </pre>
+ * <p/>
  *
  * @author Oleg Chernovskiy
  */
 public class LyricsShowActivity extends DialogActivity {
+
+    private static final String PLUGIN_TAG_EDIT_PKG = "com.kanedias.vanilla.audiotag";
 
     private SharedPreferences mPrefs;
 
@@ -101,8 +113,8 @@ public class LyricsShowActivity extends DialogActivity {
         mWriteButton = findViewById(R.id.write_button);
         mOkButton = findViewById(R.id.ok_button);
 
+        handleLaunchPlugin(getIntent(), true);
         setupUI();
-        handlePassedIntent(true); // called in onCreate to be shown only once
     }
 
     @Override
@@ -134,19 +146,43 @@ public class LyricsShowActivity extends DialogActivity {
             case R.id.reload_option:
                 // show loading circle
                 mSwitcher.setDisplayedChild(0);
-                handlePassedIntent(false);
+                handleLaunchPlugin(getIntent(), false);
                 return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void handlePassedIntent(boolean useLocal) {
+    private void handleLaunchPlugin(Intent intent, boolean useLocal) {
+        if (TextUtils.equals(getIntent().getAction(), ACTION_WAKE_PLUGIN)) {
+            // just show that we're okay
+            Log.i(LOG_TAG, "Plugin enabled!");
+            finish();
+            return;
+        }
+
+        if (useLocal && pluginInstalled(this, PLUGIN_TAG_EDIT_PKG) && !getIntent().hasExtra(EXTRA_PARAM_P2P)) {
+            // it's user-requested, try to retrieve lyrics from the tag first
+            Intent readLyrics = new Intent(ACTION_LAUNCH_PLUGIN);
+            readLyrics.setPackage(PLUGIN_TAG_EDIT_PKG);
+            readLyrics.putExtra(EXTRA_PARAM_URI, (Uri) intent.getParcelableExtra(EXTRA_PARAM_URI));
+            readLyrics.putExtra(EXTRA_PARAM_PLUGIN_APP, getApplicationInfo());
+            readLyrics.putExtra(EXTRA_PARAM_P2P, P2P_READ_TAG);
+            readLyrics.putExtra(EXTRA_PARAM_P2P_KEY, new String[]{"LYRICS"}); // tag name
+            readLyrics.putExtras(getIntent());
+            startActivity(readLyrics);
+            finish(); // end this activity instance, it will be re-created by incoming intent from Tag Editor
+            return;
+        }
+
         // check if this is an answer from tag plugin
         if (useLocal && TextUtils.equals(getIntent().getStringExtra(EXTRA_PARAM_P2P), P2P_READ_TAG)) {
-            // already checked this string in service, no need in additional checks
-            String lyrics = getIntent().getStringArrayExtra(EXTRA_PARAM_P2P_VAL)[0];
-            showFetchedLyrics(lyrics);
-            return;
+            String[] fields = intent.getStringArrayExtra(EXTRA_PARAM_P2P_VAL);
+            if (fields != null && fields.length > 0 && !TextUtils.isEmpty(fields[0])) {
+                // start activity with retrieved lyrics
+                String lyrics = getIntent().getStringArrayExtra(EXTRA_PARAM_P2P_VAL)[0];
+                showFetchedLyrics(lyrics);
+                return;
+            }
         }
 
         // try to load from *.lrc file nearby
@@ -154,9 +190,40 @@ public class LyricsShowActivity extends DialogActivity {
             return;
         }
 
-
         // we didn't receive lyrics from tag plugin, try to retrieve it via lyrics engine
         new LyricsFetcher().execute(getIntent());
+    }
+
+    /**
+     * This plugin also has P2P functionality with others.
+     * <br/>
+     * Tag plugin - Uses provided field retrieval interface for LYRICS tag:
+     * <p/>
+     * <pre>
+     *     Lyrics Plugin                               Tag Editor Plugin
+     *          |                                         |
+     *          |       P2P intent with lyrics request    |
+     *          |---------------------------------------->|
+     *          |                                         |
+     *          |       P2P intent with lyrics response   |
+     *          |<----------------------------------------| (can be empty if no embedded lyrics found)
+     *          |                                         |
+     *
+     *     At this point lyrics plugin starts activity with either
+     *     extras from lyrics response (if found) or with original intent
+     * </pre>
+     *
+     * @param ctx context to resolve activities from
+     * @param pkgName package name of the plugin to be queried
+     */
+    private static boolean pluginInstalled(Context ctx, String pkgName) {
+        List<ResolveInfo> resolved = ctx.getPackageManager().queryIntentActivities(new Intent(ACTION_LAUNCH_PLUGIN), 0);
+        for (ResolveInfo pkg : resolved) {
+            if (TextUtils.equals(pkg.activityInfo.packageName, pkgName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -205,7 +272,6 @@ public class LyricsShowActivity extends DialogActivity {
      * Initialize UI elements with handlers and action listeners
      */
     private void setupUI() {
-        mLyricsText.setMovementMethod(new ScrollingMovementMethod());
         mWriteButton.setOnClickListener(new SelectWriteAction());
         mOkButton.setOnClickListener(v -> finish());
     }
@@ -288,7 +354,7 @@ public class LyricsShowActivity extends DialogActivity {
             startActivity(safIntent);
             // it will pass us URI back after the work is done
         } else {
-            writeThroughFile(data, mediaFile, lrcTarget);
+            writeThroughFile(data, lrcTarget);
         }
     }
 
@@ -296,10 +362,9 @@ public class LyricsShowActivity extends DialogActivity {
      * Write to *.lrc file through file-based API
      *
      * @param data     - data to write
-     * @param original - original media file that was requested by user
      * @param target   - target file for writing metadata into
      */
-    private void writeThroughFile(byte[] data, File original, File target) {
+    private void writeThroughFile(byte[] data, File target) {
         try {
             FileOutputStream fos = new FileOutputStream(target);
             fos.write(data);
@@ -330,13 +395,19 @@ public class LyricsShowActivity extends DialogActivity {
             return;
         }
 
-        if (originalRef == null) {
+        if (originalRef == null || originalRef.getParentFile() == null) {
             // nothing selected or invalid file?
             Toast.makeText(this, R.string.saf_nothing_selected, Toast.LENGTH_LONG).show();
             return;
         }
 
         DocumentFile folderJpgRef = originalRef.getParentFile().createFile("image/*", name);
+        if (folderJpgRef == null) {
+            // couldn't create file?
+            Toast.makeText(this, R.string.saf_write_error, Toast.LENGTH_LONG).show();
+            return;
+        }
+
         try {
             ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(folderJpgRef.getUri(), "rw");
             if (pfd == null) {
@@ -363,13 +434,13 @@ public class LyricsShowActivity extends DialogActivity {
     private void writeToFileTag() {
         String lyrics = mLyricsText.getText().toString();
         Intent request = new Intent(ACTION_LAUNCH_PLUGIN);
-        request.setPackage(PluginService.PLUGIN_TAG_EDIT_PKG);
-        request.putExtra(EXTRA_PARAM_URI, (Bundle) getIntent().getParcelableExtra(EXTRA_PARAM_URI));
+        request.setPackage(PLUGIN_TAG_EDIT_PKG);
+        request.putExtra(EXTRA_PARAM_URI, (Uri) getIntent().getParcelableExtra(EXTRA_PARAM_URI));
         request.putExtra(EXTRA_PARAM_PLUGIN_APP, getApplicationInfo());
         request.putExtra(EXTRA_PARAM_P2P, P2P_WRITE_TAG);
         request.putExtra(EXTRA_PARAM_P2P_KEY, new String[]{"LYRICS"}); // tag name
         request.putExtra(EXTRA_PARAM_P2P_VAL, new String[]{lyrics}); // tag value
-        startService(request);
+        startActivity(request);
     }
 
     /**
@@ -384,7 +455,7 @@ public class LyricsShowActivity extends DialogActivity {
             actions.add(getString(R.string.write_to_lrc));
 
             // if tag editor is installed, show `write to tag` button
-            if (pluginInstalled(LyricsShowActivity.this, PluginService.PLUGIN_TAG_EDIT_PKG)) {
+            if (pluginInstalled(LyricsShowActivity.this, PLUGIN_TAG_EDIT_PKG)) {
                 actions.add(getString(R.string.write_to_tag));
             }
 

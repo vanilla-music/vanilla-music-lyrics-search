@@ -4,7 +4,7 @@
     <item
         android:id="@+id/reload_option"
         android:title="@string/reload"
-        android:icon="@android:drawable/ic_menu_rotate"
+        android:icon="@drawable/refresh"
         android:showAsAction="always" />
 
 </menu>
