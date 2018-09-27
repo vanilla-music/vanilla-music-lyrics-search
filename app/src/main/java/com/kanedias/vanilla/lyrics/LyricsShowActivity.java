@@ -20,6 +20,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -190,6 +191,7 @@ public class LyricsShowActivity extends DialogActivity {
     protected void onResume() {
         super.onResume();
 
+        // UI is initialized now
         handleUiIntent(true);
 
         if (getIntent().hasExtra(EXTRA_PARAM_SAF_P2P)) {
@@ -208,8 +210,13 @@ public class LyricsShowActivity extends DialogActivity {
             return;
         }
 
-        // we have write permission, continue with persist
-        persistAsLrcFile();
+        for (int i = 0; i < permissions.length; ++i) {
+            if (TextUtils.equals(permissions[i], WRITE_EXTERNAL_STORAGE)
+                    && grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                // continue persist process started in Write... -> *.lrc file
+                persistAsLrcFile();
+            }
+        }
     }
 
     /**
@@ -445,18 +452,18 @@ public class LyricsShowActivity extends DialogActivity {
             return;
         }
 
-        DocumentFile folderJpgRef = originalRef.getParentFile().createFile("image/*", name);
-        if (folderJpgRef == null) {
+        DocumentFile lrcFileRef = originalRef.getParentFile().createFile("image/*", name);
+        if (lrcFileRef == null) {
             // couldn't create file?
             Toast.makeText(this, R.string.saf_write_error, Toast.LENGTH_LONG).show();
             return;
         }
 
         try {
-            ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(folderJpgRef.getUri(), "rw");
+            ParcelFileDescriptor pfd = getContentResolver().openFileDescriptor(lrcFileRef.getUri(), "rw");
             if (pfd == null) {
                 // should not happen
-                Log.e(LOG_TAG, "SAF provided incorrect URI!" + folderJpgRef.getUri());
+                Log.e(LOG_TAG, "SAF provided incorrect URI!" + lrcFileRef.getUri());
                 return;
             }
 
