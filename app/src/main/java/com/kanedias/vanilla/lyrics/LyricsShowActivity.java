@@ -41,9 +41,8 @@ import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import com.kanedias.vanilla.plugins.DialogActivity;
-import com.kanedias.vanilla.plugins.PluginConstants;
 import com.kanedias.vanilla.plugins.PluginUtils;
-import com.kanedias.vanilla.plugins.saf.SafRequestActivity;
+import com.kanedias.vanilla.plugins.saf.SafPermissionHandler;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -100,6 +99,7 @@ public class LyricsShowActivity extends DialogActivity {
     private ViewSwitcher mSwitcher;
     private Button mOkButton, mWriteButton;
 
+    private SafPermissionHandler mSafHandler;
     private LyricsEngine mEngine = new LyricsWikiEngine();
 
     @Override
@@ -113,6 +113,7 @@ public class LyricsShowActivity extends DialogActivity {
 
         setContentView(R.layout.activity_lyrics_show);
 
+        mSafHandler = new SafPermissionHandler(this);
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         mSwitcher = findViewById(R.id.loading_switcher);
@@ -193,11 +194,6 @@ public class LyricsShowActivity extends DialogActivity {
 
         // UI is initialized now
         handleUiIntent(true);
-
-        if (getIntent().hasExtra(EXTRA_PARAM_SAF_P2P)) {
-            // it's the answer from SAF activity, persist
-            persistAsLrcFile();
-        }
     }
 
     @Override
@@ -219,11 +215,24 @@ public class LyricsShowActivity extends DialogActivity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (mSafHandler.onActivityResult(requestCode, resultCode, data)) {
+            persistAsLrcFile();
+        }
+    }
+
     /**
-     * Handle user-interactive intent after activity was initialized
+     * Handle user-interactive intent after activity was initialized. Loads lyrics from various sources if necessary.
      * @param useLocal true if tag info or *.lrc file can be used to retrieve lyrics, false if only network is allowed
      */
     private void handleUiIntent(boolean useLocal) {
+        if (!TextUtils.isEmpty(mLyricsText.getText())) {
+            // we already have lyrics loaded, skip trying to get it from elsewhere
+            return;
+        }
+
         // check if this is an answer from tag plugin
         if (useLocal && TextUtils.equals(getIntent().getStringExtra(EXTRA_PARAM_P2P), P2P_READ_TAG)) {
             String[] fields = getIntent().getStringArrayExtra(EXTRA_PARAM_P2P_VAL);
@@ -296,11 +305,18 @@ public class LyricsShowActivity extends DialogActivity {
      * @return true if lyrics was loaded from file, false otherwise
      */
     private boolean loadFromFile() {
+        // used didn't write any *.lrc file, skip loading
+        // better, should we ask user for it in a dialog?
         if (!PluginUtils.havePermissions(this, WRITE_EXTERNAL_STORAGE)) {
             return false;
         }
 
         Uri fileUri = getIntent().getParcelableExtra(EXTRA_PARAM_URI);
+        if (fileUri == null || fileUri.getPath() == null) {
+            // wrong intent passed?
+            return false;
+        }
+
         File media = new File(fileUri.getPath());
         String lyricsFileName = lyricsForFile(media);
         File lyricsFile = new File(media.getParentFile(), lyricsFileName);
@@ -309,7 +325,7 @@ public class LyricsShowActivity extends DialogActivity {
         }
 
         try {
-            String lyricsText = LyricsWikiEngine.readIt(new FileInputStream(lyricsFile));
+            String lyricsText = new String(PluginUtils.readFully(new FileInputStream(lyricsFile)), "UTF-8");
             showFetchedLyrics(lyricsText);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Failed to read lyrics text from file!", e);
@@ -375,7 +391,7 @@ public class LyricsShowActivity extends DialogActivity {
      */
     private void persistAsLrcFile() {
         Uri fileUri = getIntent().getParcelableExtra(EXTRA_PARAM_URI);
-        if (fileUri == null) {
+        if (fileUri == null || fileUri.getPath() == null) {
             // wrong intent passed?
             return;
         }
@@ -396,14 +412,8 @@ public class LyricsShowActivity extends DialogActivity {
                 return;
             }
 
-            // request SAF permissions in SAF activity
-            Intent safIntent = new Intent(this, SafRequestActivity.class);
-            safIntent.putExtra(PluginConstants.EXTRA_PARAM_PLUGIN_APP, getApplicationInfo());
-            safIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            safIntent.putExtras(getIntent());
-            startActivity(safIntent);
-            finish();
-            // it will pass us URI back after the work is done
+            // request SAF permissions in handler
+            mSafHandler.handleFile(mediaFile);
         } else {
             writeThroughFile(data, lrcTarget);
         }

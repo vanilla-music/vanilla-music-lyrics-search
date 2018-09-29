@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.kanedias.vanilla.plugins.PluginUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -14,9 +15,6 @@ import org.jsoup.nodes.TextNode;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.StringWriter;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -89,7 +87,7 @@ public class LyricsWikiEngine implements LyricsEngine {
             }
 
             InputStream is = apiCall.getInputStream();
-            String reply = readIt(is);
+            String reply = new String(PluginUtils.readFully(is), "UTF-8");
             JSONObject getSongAnswer = new JSONObject(reply);
 
             return getLyricsUrl(getSongAnswer);
@@ -138,18 +136,5 @@ public class LyricsWikiEngine implements LyricsEngine {
             Log.w(TAG, "Unknown format of getSong API call answer", e);
             return null;
         }
-    }
-
-    // Reads an InputStream and converts it to a String.
-    public static String readIt(InputStream stream) throws IOException {
-        Reader reader = new InputStreamReader(stream, "UTF-8");
-        StringWriter sw = new StringWriter();
-        char[] buffer = new char[4096];
-        int count;
-        while ((count = reader.read(buffer)) != -1) {
-            sw.write(buffer, 0, count);
-        }
-
-        return sw.toString();
     }
 }

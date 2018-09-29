@@ -31,10 +31,6 @@
                 <action android:name="ch.blinkenlights.android.vanilla.action.LAUNCH_PLUGIN" />
             </intent-filter>
         </activity>
-        <activity
-            android:name="com.kanedias.vanilla.plugins.saf.SafRequestActivity"
-            android:theme="@android:style/Theme.DeviceDefault.Dialog"
-            android:excludeFromRecents="true"/>
     </application>
 
 </manifest>
