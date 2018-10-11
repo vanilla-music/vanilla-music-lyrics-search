@@ -3,9 +3,14 @@ language: android
 jdk:
   - oraclejdk8
 
+addons:
+  apt:
+    update: true
+
 env:
   global:
     - ADB_INSTALL_TIMEOUT=8
+    - GOOGLE_PUBLISH_JSON=app/misc/android-publisher-account.json
 
 android:
   components:
@@ -29,13 +34,22 @@ cache:
     - "$HOME/.gradle/caches/"
     - "$HOME/.gradle/wrapper/"
 
+before_install:
+  - sudo apt-get install -y gnupg2
+  - gpg --batch --decrypt --output ${GOOGLE_PUBLISH_JSON} --passphrase ${GOOGLE_ACCOUNT_DECRYPTION_KEY} ${GOOGLE_PUBLISH_JSON}.gpg
+
 script:
-  - "./gradlew --info assembleDebug"
+  - "./gradlew --info assembleRelease"
 
 deploy:
-  skip_cleanup: true
-  provider: releases
-  api_key: "${GITHUB_PUBLISH_OAUTH_TOKEN}"
-  file: app/build/outputs/apk/debug/app-debug.apk
-  on:
-    tags: true
+  - provider: releases
+    api_key: "${GITHUB_PUBLISH_OAUTH_TOKEN}"
+    file: app/build/build/outputs/apk/release/app-release.apk
+    skip_cleanup: true
+    on:
+      tags: true
+  - provider: script
+    script: ./gradlew app:publishApkRelease
+    skip_cleanup: true
+    on:
+      tags: true
