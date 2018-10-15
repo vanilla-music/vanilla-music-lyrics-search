@@ -3,7 +3,6 @@ apply plugin: 'com.github.triplet.play'
 
 android {
     compileSdkVersion 28
-    buildToolsVersion '28.0.2'
     defaultConfig {
         applicationId "com.kanedias.vanilla.lyrics"
         minSdkVersion 14

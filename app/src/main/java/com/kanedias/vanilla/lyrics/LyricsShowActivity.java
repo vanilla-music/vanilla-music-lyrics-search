@@ -228,7 +228,7 @@ public class LyricsShowActivity extends DialogActivity {
      * @param useLocal true if tag info or *.lrc file can be used to retrieve lyrics, false if only network is allowed
      */
     private void handleUiIntent(boolean useLocal) {
-        if (!TextUtils.isEmpty(mLyricsText.getText())) {
+        if (useLocal && !TextUtils.isEmpty(mLyricsText.getText())) {
             // we already have lyrics loaded, skip trying to get it from elsewhere
             return;
         }
