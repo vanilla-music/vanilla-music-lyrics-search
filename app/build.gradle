@@ -7,8 +7,8 @@ android {
         applicationId "com.kanedias.vanilla.lyrics"
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode 12
-        versionName "1.3.2"
+        versionCode 13
+        versionName "1.3.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 
@@ -44,11 +44,11 @@ android {
 }
 
 play {
-    jsonFile = file("misc/android-publisher-account.json")
+    serviceAccountCredentials = file("misc/android-publisher-account.json")
     track = 'production'
 }
 
 dependencies {
-    implementation project(':plugin-commons')
+    implementation 'com.github.vanilla-music:vanilla-music-plugin-commons:1.0.3'
     implementation 'org.jsoup:jsoup:1.11.3'     // for parsing lyrics wiki pages
 }

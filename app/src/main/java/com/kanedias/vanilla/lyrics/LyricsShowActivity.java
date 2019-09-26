@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2018 Oleg `Kanedias` Chernovskiy <adonai@xaker.ru>
+ * Copyright (C) 2016-2019 Oleg `Kanedias` Chernovskiy <adonai@xaker.ru>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,8 +27,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.v4.provider.DocumentFile;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -39,6 +37,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
+
+import androidx.annotation.NonNull;
+import androidx.documentfile.provider.DocumentFile;
 
 import com.kanedias.vanilla.plugins.DialogActivity;
 import com.kanedias.vanilla.plugins.PluginUtils;
