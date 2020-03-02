@@ -141,7 +141,7 @@ public class LyricsWikiEngine implements LyricsEngine {
         return builder.toString();
     }
 
-    private String getLyricsUrl(JSONObject getSongAnswer) {
+    private static String getLyricsUrl(JSONObject getSongAnswer) {
         try {
             String pageId = getSongAnswer.getString("page_id");
             if (TextUtils.isEmpty(pageId)) {
