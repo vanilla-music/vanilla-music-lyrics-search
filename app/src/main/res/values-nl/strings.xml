@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Vanilla Songtekst Zoeken</string>
+    <string name="app_name">Songtekst Zoeken</string>
     <string name="lyrics_search">Songtekst zoeken</string>
     <string name="plugin_desc">Zoek naar songteksten van nummers op lyrics wikia</string>
     <string name="lyrics_not_found">Songteksten niet gevonden!</string>

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Vanilla dalszövegkereső</string>
+    <string name="app_name">Dalszövegkereső</string>
     <string name="lyrics_search">Dalszövegkereső</string>
     <string name="plugin_desc">A segítségével dalszövegeket kereshet a számokhoz a wikián</string>
     <string name="lyrics_not_found">Nem található dalszöveg.</string>

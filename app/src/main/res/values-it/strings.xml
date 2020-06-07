@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Ricerca testi di Vanilla</string>
+    <string name="app_name">Cerca testo</string>
     <string name="lyrics_search">Cerca testo</string>
     <string name="plugin_desc">Ti permette di cercare i testi delle canzoni su LyricWiki</string>
     <string name="lyrics_not_found">Testo non trovato!</string>
