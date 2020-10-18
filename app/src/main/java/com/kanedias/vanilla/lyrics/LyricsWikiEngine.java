@@ -32,6 +32,7 @@ import org.jsoup.nodes.TextNode;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.zip.GZIPInputStream;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -91,6 +92,7 @@ public class LyricsWikiEngine implements LyricsEngine {
 
             // construct an http request
             apiCall = (HttpsURLConnection) new URL(link.toString()).openConnection();
+            apiCall.setRequestProperty("Accept-Encoding", "gzip");
             apiCall.setReadTimeout(10_000);
             apiCall.setConnectTimeout(15_000);
 
@@ -102,7 +104,12 @@ public class LyricsWikiEngine implements LyricsEngine {
                 return null;
             }
 
-            InputStream is = apiCall.getInputStream();
+            InputStream is;
+            if ("gzip".equals(apiCall.getContentEncoding())) {
+                is = new GZIPInputStream(apiCall.getInputStream());
+            } else {
+                is = apiCall.getInputStream();
+            }
             String reply = new String(PluginUtils.readFully(is), "UTF-8");
             JSONObject getSongAnswer = new JSONObject(reply);
 
