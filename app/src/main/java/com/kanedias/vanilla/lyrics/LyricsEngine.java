@@ -21,7 +21,7 @@ import android.os.HandlerThread;
 /**
  * Interface for various engines for lyrics extraction
  *
- * @author Oleg Chernovskiy
+ * @author Kanedias
  */
 public interface LyricsEngine {
 

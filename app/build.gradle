@@ -22,11 +22,16 @@ android {
     }
 
     buildTypes {
+        def geniusApiToken = file("misc/genius-api-token.txt").text
+
         debug {
             applicationIdSuffix = ".debug"
+            buildConfigField "String", "GENIUS_API_TOKEN", "\"$geniusApiToken\""
         }
 
         release {
+            buildConfigField "String", "GENIUS_API_TOKEN", "\"$geniusApiToken\""
+
             signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

@@ -88,7 +88,7 @@ import static com.kanedias.vanilla.plugins.saf.SafUtils.isSafNeeded;
  * </pre>
  * <p/>
  *
- * @author Oleg Chernovskiy
+ * @author Kanedias
  */
 public class LyricsShowActivity extends DialogActivity {
 
@@ -101,7 +101,7 @@ public class LyricsShowActivity extends DialogActivity {
     private Button mOkButton, mWriteButton;
 
     private SafPermissionHandler mSafHandler;
-    private LyricsEngine mEngine = new LyricsWikiEngine();
+    private LyricsEngine mEngine = new GeniusApiEngine();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

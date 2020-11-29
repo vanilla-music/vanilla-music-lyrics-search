@@ -29,6 +29,8 @@ import static com.kanedias.vanilla.plugins.PluginConstants.*;
  * Broadcast receiver used for retrieving query intents
  *
  * @see PluginConstants
+ *
+ * @author Kanedias
  */
 public class PluginQueryBroadcastReceiver extends BroadcastReceiver {
 

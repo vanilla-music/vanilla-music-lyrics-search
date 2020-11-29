@@ -45,12 +45,14 @@ import javax.net.ssl.HttpsURLConnection;
  * Hence the retrieval is done in 2 steps - first, call to <code>getSong</code> to
  * find the requested song and, if found, get the page containing full song lyrics
  *
- * @author Oleg Chernovskiy
+ * @deprecated LyricWiki is dead: <a href="https://web.archive.org/web/20200830142257/https://lyrics.fandom.com/wiki/LyricWiki">postmortem</a>
+ *
+ * @author Kanedias
  *
  */
-public class LyricsWikiEngine implements LyricsEngine {
+public class LyricWikiEngine implements LyricsEngine {
 
-    private static final String TAG = LyricsWikiEngine.class.getSimpleName();
+    private static final String TAG = LyricWikiEngine.class.getSimpleName();
 
     @Override
     public String getLyrics(String artistName, String songTitle) {
